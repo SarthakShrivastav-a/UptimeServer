@@ -18,11 +18,11 @@ func AddMonitorHandler(db *sql.DB) http.HandlerFunc {
 		}
 
 		if err := repository.AddMonitor(db, monitor); err != nil {
-			fmt.Print(err)
 			http.Error(w, "Failed to add monitor", http.StatusInternalServerError)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
+		fmt.Print("Created a New entry in db")
 	}
 }
 
