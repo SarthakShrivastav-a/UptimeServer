@@ -23,6 +23,7 @@ func AddMonitorHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
+		fmt.Print("Created an entry in monitor.db")
 	}
 }
 
