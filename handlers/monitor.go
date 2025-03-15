@@ -6,23 +6,43 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 )
 
 func AddMonitorHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("AddMonitor function called")
+
+		// Read the raw request body for debugging
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("Error reading request body: %v", err)
+			http.Error(w, "Failed to read request body", http.StatusBadRequest)
+			return
+		}
+		fmt.Printf("Received Raw JSON: %s\n", string(body))
+
 		var monitor models.Monitor
-		if err := json.NewDecoder(r.Body).Decode(&monitor); err != nil {
-			http.Error(w, "Invalid input", http.StatusBadRequest)
+		err = json.Unmarshal(body, &monitor)
+		if err != nil {
+			log.Printf("Error decoding JSON: %v", err)
+			http.Error(w, "Invalid JSON format", http.StatusBadRequest)
 			return
 		}
 
+		fmt.Printf("Decoded Monitor struct: %+v\n", monitor)
+
 		if err := repository.AddMonitor(db, monitor); err != nil {
+			log.Printf("Failed to add monitor to DB: %v", err)
 			http.Error(w, "Failed to add monitor", http.StatusInternalServerError)
 			return
 		}
+
 		w.WriteHeader(http.StatusCreated)
-		fmt.Print("Created a New entry in db")
+		fmt.Fprintln(w, "Created a new entry in the database")
+		log.Println("Created a new entry in DB")
 	}
 }
 
