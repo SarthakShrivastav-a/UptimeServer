@@ -1,8 +1,8 @@
 package models
 
 type ErrorCondition struct {
-	TriggerOn string `json:"trigger_on"` // enum : STATUS_NOT, RESPONSE_CONTAINS, TIMEOUT will update more baad mein
-	Value     []int  `json:"value"`      // list of hhtttp status codes
+	TriggerOn string `json:"triggerOn"` // enum : STATUS_NOT, RESPONSE_CONTAINS, TIMEOUT will update more baad mein
+	Value     []int  `json:"value"`     // list of hhtttp status codes
 }
 
 type Monitor struct {
