@@ -3,6 +3,7 @@ package main
 import (
 	"Uptime/config"
 	"Uptime/handlers"
+	"Uptime/services"
 	"log"
 	"net/http"
 )
@@ -16,6 +17,8 @@ func main() {
 
 	http.HandleFunc("/add_monitor", handlers.AddMonitorHandler(db))
 	http.HandleFunc("/get_monitors", handlers.GetAllMonitorsHandler(db))
+
+	services.StartMonitoring(db)
 
 	log.Println("Server running on port 8081")
 	http.ListenAndServe(":8081", nil)
