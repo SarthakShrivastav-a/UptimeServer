@@ -48,7 +48,10 @@ func monitorWorker(monitorChan <-chan models.Monitor) { //processe thee urlls an
 
 		statusCode, responseTime, err := checkWebsiteStatus(monitor.URL, timeout)
 		if shouldTriggerAlert(monitor.ErrorCondition, statusCode, responseTime, err) {
-			fmt.Printf("🚨 Alert triggered for %s (Status: %d, Time: %v)\n", monitor.URL, statusCode, responseTime)
+			fmt.Printf("Alert triggered for %s (Status: %d, Time: %v)\n", monitor.URL, statusCode, responseTime)
+			post(monitor, "DOWN", responseTime)
+		} else {
+			post(monitor, "UP", responseTime)
 		}
 	}
 }
@@ -124,7 +127,7 @@ func fetchMonitors(db *sql.DB) ([]models.Monitor, error) {
 
 		// Parse JSON into ErrorCondition struct
 		if err := json.Unmarshal([]byte(errorConditionJSON), &m.ErrorCondition); err != nil {
-			fmt.Println("⚠️ Error parsing error_condition JSON:", err)
+			fmt.Println("Error parsing error_condition JSON:", err)
 			continue // Skip this monitor if parsing fails
 		}
 

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"Uptime/config"
 	"Uptime/models"
 	"bytes"
 	"encoding/json"
@@ -9,22 +10,23 @@ import (
 	"time"
 )
 
-func post(monitor models.Monitor) {
-	alertURL := "http://your-spring-boot-server.com/api/alert" // Replace with actual Spring Boot endpoint
+func post(monitor models.Monitor, status string, responseTime time.Duration) {
+	alertURL := config.GetSpringBootURL()
 
-	// Construct JSON payload
 	alertData, _ := json.Marshal(map[string]interface{}{
-		"monitor_id":     monitor.MonitorID,
-		"url":            monitor.URL,
-		"trigger_reason": monitor.ErrorCondition.TriggerOn,
-		"timestamp":      time.Now().Format(time.RFC3339),
+		"monitorId":     monitor.MonitorID,
+		"status":        status,
+		"triggerReason": monitor.ErrorCondition.TriggerOn,
+		"checkedAt":     time.Now().Format(time.RFC3339),
+		"responseTime":  responseTime.Milliseconds(),
 	})
 	resp, err := http.Post(alertURL, "application/json", bytes.NewBuffer(alertData))
 	if err != nil {
-		fmt.Println("Failed to send alert:", err)
+		fmt.Println("Failed to send status update:", err)
 		return
 	}
 	defer resp.Body.Close()
 
-	fmt.Println("✅ Alert sent to Spring Boot, response status:", resp.Status)
+	fmt.Printf("Status update sent to Spring Boot for %s: %s, response status: %s\n",
+		monitor.URL, status, resp.Status)
 }
