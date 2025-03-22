@@ -4,9 +4,21 @@ import (
 	"database/sql"
 	"io/ioutil"
 	"log"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+const (
+	SpringBootURL = "http://localhost:8080/api/alerts"
+)
+
+func GetSpringBootURL() string {
+	if url := os.Getenv("SPRINGBOOT_URL"); url != "" {
+		return url
+	}
+	return SpringBootURL
+}
 
 func InitDB() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", "monitor.db")
