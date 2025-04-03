@@ -11,7 +11,7 @@ import (
 )
 
 func post(monitor models.Monitor, status string, responseTime time.Duration) {
-	alertURL := config.GetSpringBootURL()
+	alertURL := config.GetServerUrl()
 
 	alertData, _ := json.Marshal(map[string]interface{}{
 		"monitorId":     monitor.MonitorID,
