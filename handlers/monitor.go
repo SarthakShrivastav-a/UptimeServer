@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func AddMonitorHandler(db *sql.DB) http.HandlerFunc {
@@ -91,6 +92,50 @@ func DeleteMonitorHandler(db *sql.DB) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "Successfully deleted monitor from database")
 		log.Println("Deleted monitor from DB")
+	}
+}
+func UpdateMonitorHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("UpdateMonitor function called")
+
+		// Read the raw request body for debugging
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("Error reading request body: %v", err)
+			http.Error(w, "Failed to read request body", http.StatusBadRequest)
+			return
+		}
+		fmt.Printf("Received Raw JSON: %s\n", string(body))
+
+		var monitor models.Monitor
+		err = json.Unmarshal(body, &monitor)
+		if err != nil {
+			log.Printf("Error decoding JSON: %v", err)
+			http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+			return
+		}
+
+		if monitor.MonitorID == "" {
+			log.Printf("Invalid monitor ID: %v", monitor.MonitorID)
+			http.Error(w, "Invalid or missing monitor ID", http.StatusBadRequest)
+			return
+		}
+
+		fmt.Printf("Decoded Monitor struct for update: %+v\n", monitor)
+
+		if err := repository.UpdateMonitor(db, monitor); err != nil {
+			log.Printf("Failed to update monitor in DB: %v", err)
+			if strings.Contains(err.Error(), "no monitor found") {
+				http.Error(w, err.Error(), http.StatusNotFound)
+			} else {
+				http.Error(w, "Failed to update monitor", http.StatusInternalServerError)
+			}
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "Successfully updated monitor in the database")
+		log.Println("Updated monitor in DB")
 	}
 }
 

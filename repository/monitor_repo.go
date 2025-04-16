@@ -40,7 +40,34 @@ func DeleteMonitor(db *sql.DB, monitorID string) error {
 	log.Printf("Successfully deleted monitor with ID %v", monitorID)
 	return nil
 }
+func UpdateMonitor(db *sql.DB, monitor models.Monitor) error {
+	errorConditionJSON, err := json.Marshal(monitor.ErrorCondition)
+	if err != nil {
+		log.Println("Error serializing ErrorCondition:", err)
+		return err
+	}
 
+	result, err := db.Exec("UPDATE monitors SET url = ?, error_condition = ? WHERE monitor_id = ?",
+		monitor.URL, string(errorConditionJSON), monitor.MonitorID)
+
+	if err != nil {
+		log.Println("Error updating monitor:", err)
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("Error getting rows affected:", err)
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("no monitor found with ID %v", monitor.MonitorID)
+	}
+
+	log.Printf("Successfully updated monitor with ID %v", monitor.MonitorID)
+	return nil
+}
 func GetAllMonitors(db *sql.DB) ([]models.Monitor, error) {
 	rows, err := db.Query("SELECT monitor_id, url, error_condition FROM monitors")
 	if err != nil {
