@@ -4,6 +4,7 @@ import (
 	"Uptime/models"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 )
 
@@ -19,7 +20,84 @@ func AddMonitor(db *sql.DB, monitor models.Monitor) error {
 		monitor.MonitorID, monitor.URL, string(errorConditionJSON))
 	return err
 }
+func DeleteMonitor(db *sql.DB, monitorID string) error {
+	result, err := db.Exec("DELETE FROM monitors WHERE monitor_id = ?", monitorID)
+	if err != nil {
+		log.Println("Error deleting monitor:", err)
+		return err
+	}
 
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("Error getting rows affected:", err)
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("no monitor found with ID %v", monitorID)
+	}
+
+	log.Printf("Successfully deleted monitor with ID %v", monitorID)
+	return nil
+}
+func UpdateMonitorErrorCondition(db *sql.DB, monitorID string, errorCondition models.ErrorCondition) error {
+	errorConditionJSON, err := json.Marshal(errorCondition)
+	if err != nil {
+		log.Println("Error serializing ErrorCondition:", err)
+		return err
+	}
+
+	// SQL query that only updates the error_condition field
+	result, err := db.Exec("UPDATE monitors SET error_condition = ? WHERE monitor_id = ?",
+		string(errorConditionJSON), monitorID)
+
+	if err != nil {
+		log.Println("Error updating monitor error condition:", err)
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("Error getting rows affected:", err)
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("no monitor found with ID %v", monitorID)
+	}
+
+	log.Printf("Successfully updated error condition for monitor with ID %v", monitorID)
+	return nil
+}
+
+// func UpdateMonitor(db *sql.DB, monitor models.Monitor) error {
+// 	errorConditionJSON, err := json.Marshal(monitor.ErrorCondition)
+// 	if err != nil {
+// 		log.Println("Error serializing ErrorCondition:", err)
+// 		return err
+// 	}
+
+// 	result, err := db.Exec("UPDATE monitors SET url = ?, error_condition = ? WHERE monitor_id = ?",
+// 		monitor.URL, string(errorConditionJSON), monitor.MonitorID)
+
+// 	if err != nil {
+// 		log.Println("Error updating monitor:", err)
+// 		return err
+// 	}
+
+// 	rowsAffected, err := result.RowsAffected()
+// 	if err != nil {
+// 		log.Println("Error getting rows affected:", err)
+// 		return err
+// 	}
+
+// 	if rowsAffected == 0 {
+// 		return fmt.Errorf("no monitor found with ID %v", monitor.MonitorID)
+// 	}
+
+//		log.Printf("Successfully updated monitor with ID %v", monitor.MonitorID)
+//		return nil
+//	}
 func GetAllMonitors(db *sql.DB) ([]models.Monitor, error) {
 	rows, err := db.Query("SELECT monitor_id, url, error_condition FROM monitors")
 	if err != nil {

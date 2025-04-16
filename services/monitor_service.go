@@ -52,6 +52,7 @@ func monitorWorker(monitorChan <-chan models.Monitor) { //processe thee urlls an
 			post(monitor, "DOWN", responseTime)
 		} else {
 			post(monitor, "UP", responseTime)
+			fmt.Printf("%v Working Fine\n", monitor.URL)
 		}
 	}
 }

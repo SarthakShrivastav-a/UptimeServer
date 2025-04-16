@@ -10,14 +10,14 @@ import (
 )
 
 const (
-	SpringBootURL = "http://localhost:8080/api/alerts"
+	serverUrl = "http://localhost:8080/api/private/update"
 )
 
-func GetSpringBootURL() string {
+func GetServerUrl() string {
 	if url := os.Getenv("SPRINGBOOT_URL"); url != "" {
 		return url
 	}
-	return SpringBootURL
+	return serverUrl
 }
 
 func InitDB() (*sql.DB, error) {
