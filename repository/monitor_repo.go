@@ -4,6 +4,7 @@ import (
 	"Uptime/models"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 )
 
@@ -18,6 +19,26 @@ func AddMonitor(db *sql.DB, monitor models.Monitor) error {
 	_, err = db.Exec("INSERT INTO monitors (monitor_id, url, error_condition) VALUES (?, ?, ?)",
 		monitor.MonitorID, monitor.URL, string(errorConditionJSON))
 	return err
+}
+func DeleteMonitor(db *sql.DB, monitorID int) error {
+	result, err := db.Exec("DELETE FROM monitors WHERE monitor_id = ?", monitorID)
+	if err != nil {
+		log.Println("Error deleting monitor:", err)
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Println("Error getting rows affected:", err)
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("no monitor found with ID %d", monitorID)
+	}
+
+	log.Printf("Successfully deleted monitor with ID %d", monitorID)
+	return nil
 }
 
 func GetAllMonitors(db *sql.DB) ([]models.Monitor, error) {
