@@ -20,7 +20,7 @@ func AddMonitor(db *sql.DB, monitor models.Monitor) error {
 		monitor.MonitorID, monitor.URL, string(errorConditionJSON))
 	return err
 }
-func DeleteMonitor(db *sql.DB, monitorID int) error {
+func DeleteMonitor(db *sql.DB, monitorID string) error {
 	result, err := db.Exec("DELETE FROM monitors WHERE monitor_id = ?", monitorID)
 	if err != nil {
 		log.Println("Error deleting monitor:", err)
@@ -34,10 +34,10 @@ func DeleteMonitor(db *sql.DB, monitorID int) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("no monitor found with ID %d", monitorID)
+		return fmt.Errorf("no monitor found with ID %v", monitorID)
 	}
 
-	log.Printf("Successfully deleted monitor with ID %d", monitorID)
+	log.Printf("Successfully deleted monitor with ID %v", monitorID)
 	return nil
 }
 

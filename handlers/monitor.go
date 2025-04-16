@@ -48,7 +48,13 @@ func AddMonitorHandler(db *sql.DB) http.HandlerFunc {
 
 func DeleteMonitorHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
 		fmt.Println("DeleteMonitor function called")
+
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.Printf("Error reading request body: %v", err)
@@ -58,7 +64,7 @@ func DeleteMonitorHandler(db *sql.DB) http.HandlerFunc {
 		fmt.Printf("Received Raw JSON: %s\n", string(body))
 
 		var request struct {
-			ID int `json:"id"`
+			ID string `json:"id"`
 		}
 
 		err = json.Unmarshal(body, &request)
@@ -70,8 +76,8 @@ func DeleteMonitorHandler(db *sql.DB) http.HandlerFunc {
 
 		fmt.Printf("Decoded Delete Request: %+v\n", request)
 
-		if request.ID <= 0 {
-			log.Printf("Invalid monitor ID: %d", request.ID)
+		if request.ID == "" {
+			log.Printf("Invalid monitor ID: %s", request.ID)
 			http.Error(w, "Invalid monitor ID", http.StatusBadRequest)
 			return
 		}
@@ -87,6 +93,7 @@ func DeleteMonitorHandler(db *sql.DB) http.HandlerFunc {
 		log.Println("Deleted monitor from DB")
 	}
 }
+
 func GetAllMonitorsHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		monitors, err := repository.GetAllMonitors(db)
