@@ -17,6 +17,7 @@ func main() {
 
 	http.HandleFunc("/add_monitor", handlers.AddMonitorHandler(db))
 	http.HandleFunc("/get_monitors", handlers.GetAllMonitorsHandler(db))
+	http.HandleFunc("/delete_monitor", handlers.DeleteMonitorHandler(db))
 
 	services.StartMonitoring(db)
 

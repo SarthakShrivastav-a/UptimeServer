@@ -46,6 +46,47 @@ func AddMonitorHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+func DeleteMonitorHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("DeleteMonitor function called")
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("Error reading request body: %v", err)
+			http.Error(w, "Failed to read request body", http.StatusBadRequest)
+			return
+		}
+		fmt.Printf("Received Raw JSON: %s\n", string(body))
+
+		var request struct {
+			ID int `json:"id"`
+		}
+
+		err = json.Unmarshal(body, &request)
+		if err != nil {
+			log.Printf("Error decoding JSON: %v", err)
+			http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+			return
+		}
+
+		fmt.Printf("Decoded Delete Request: %+v\n", request)
+
+		if request.ID <= 0 {
+			log.Printf("Invalid monitor ID: %d", request.ID)
+			http.Error(w, "Invalid monitor ID", http.StatusBadRequest)
+			return
+		}
+
+		if err := repository.DeleteMonitor(db, request.ID); err != nil {
+			log.Printf("Failed to delete monitor from DB: %v", err)
+			http.Error(w, "Failed to delete monitor", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "Successfully deleted monitor from database")
+		log.Println("Deleted monitor from DB")
+	}
+}
 func GetAllMonitorsHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		monitors, err := repository.GetAllMonitors(db)
