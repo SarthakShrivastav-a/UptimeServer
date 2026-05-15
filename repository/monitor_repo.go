@@ -20,6 +20,23 @@ func AddMonitor(db *sql.DB, monitor models.Monitor) error {
 		monitor.MonitorID, monitor.URL, string(errorConditionJSON))
 	return err
 }
+
+func UpsertMonitor(db *sql.DB, monitor models.Monitor) error {
+	errorConditionJSON, err := json.Marshal(monitor.ErrorCondition)
+	if err != nil {
+		log.Println("Error serializing ErrorCondition:", err)
+		return err
+	}
+
+	_, err = db.Exec(`
+		INSERT INTO monitors (monitor_id, url, error_condition)
+		VALUES (?, ?, ?)
+		ON CONFLICT(monitor_id) DO UPDATE SET
+			url = excluded.url,
+			error_condition = excluded.error_condition
+	`, monitor.MonitorID, monitor.URL, string(errorConditionJSON))
+	return err
+}
 func DeleteMonitor(db *sql.DB, monitorID string) error {
 	result, err := db.Exec("DELETE FROM monitors WHERE monitor_id = ?", monitorID)
 	if err != nil {

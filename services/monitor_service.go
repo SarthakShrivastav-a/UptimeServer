@@ -49,9 +49,9 @@ func monitorWorker(monitorChan <-chan models.Monitor) { //processe thee urlls an
 		statusCode, responseTime, err := checkWebsiteStatus(monitor.URL, timeout)
 		if shouldTriggerAlert(monitor.ErrorCondition, statusCode, responseTime, err) {
 			fmt.Printf("Alert triggered for %s (Status: %d, Time: %v)\n", monitor.URL, statusCode, responseTime)
-			post(monitor, "DOWN", responseTime)
+			publishMonitorCheck(monitor, "DOWN", responseTime, statusCode)
 		} else {
-			post(monitor, "UP", responseTime)
+			publishMonitorCheck(monitor, "UP", responseTime, statusCode)
 			fmt.Printf("%v Working Fine\n", monitor.URL)
 		}
 	}
