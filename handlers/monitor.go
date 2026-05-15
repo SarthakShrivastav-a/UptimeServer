@@ -35,7 +35,7 @@ func AddMonitorHandler(db *sql.DB) http.HandlerFunc {
 
 		fmt.Printf("Decoded Monitor struct: %+v\n", monitor)
 
-		if err := repository.AddMonitor(db, monitor); err != nil {
+		if err := repository.UpsertMonitor(db, monitor); err != nil {
 			log.Printf("Failed to add monitor to DB: %v", err)
 			http.Error(w, "Failed to add monitor", http.StatusInternalServerError)
 			return
