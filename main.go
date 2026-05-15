@@ -20,6 +20,7 @@ func main() {
 	http.HandleFunc("/delete_monitor", handlers.DeleteMonitorHandler(db))
 	http.HandleFunc("/update_monitor", handlers.UpdateMonitorErrorConditionHandler(db))
 
+	services.StartMonitorLifecycleConsumer(db)
 	services.StartMonitoring(db)
 
 	log.Println("Server running on port 8081")
